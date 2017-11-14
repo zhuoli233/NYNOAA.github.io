@@ -11,9 +11,15 @@ Global Historical Climate Network includes daily land surface observations from 
 
 ####Varaibles:
  id: Weather station ID
+ 
  date: Date of observation
+ 
  prcp: Precipitation (tenths of mm)
+ 
  snow: Snowfall (mm)
+ 
  snwd: Snow depth (mm)
+ 
  tmax: Maximum temperature (tenths of degrees C)
+ 
  tmin: Minimum temperature (tenths of degrees C)
