@@ -1,0 +1,124 @@
+---
+title: "NOAA Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+     source_code: embed
+  runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(janitor)
+library(stringr)
+library(forcats)
+library(viridis)
+library(plotly)
+library(shiny)
+library(httr)
+library(jsonlite)
+```
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+This `flexdashboard` with Shiny was made for P8105 homework 6. The data come from [NOAA](http://jeffgoldsmith.com/DSI/dataset_noaa.html), which provides weather data from different stations from 1981 to 2010. 
+
+
+```{r}
+
+noaa<- read_csv("nynoaadat.zip")  %>%
+separate(date, into = c("year", "month","day"), sep = "-") %>%
+  filter(!is.na(prcp))
+
+```
+
+```{r}
+month = noaa %>% distinct(month) %>% pull()
+
+
+selectInput("month_choice", label = h3("Select month"),
+            choices = month, selected = "01")
+hr()
+
+renderUI({
+  max_prcp = noaa %>% filter(month == input$month_choice) %>% distinct(prcp) %>% max()
+  
+  min_prcp = noaa %>% filter(month == input$month_choice) %>% distinct(prcp) %>% min()
+  
+  sliderInput("prcp_range", label = h3("Choose Precipitation range"), min = min_prcp, 
+        max = max_prcp, value = c(min, max))
+})
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Tmax against tmin
+
+```{r}
+renderPlotly({
+hexplot = filter(noaa, !is.na(tmax))%>%
+  filter(!is.na(tmin))%>%
+  mutate(tmax = as.numeric(tmax))%>%
+  mutate(tmin = as.numeric(tmin))%>%
+  filter(month == input$month_choice,
+         prcp %in% input$prcp_range[1]:input$prcp_range[2]) %>%
+ggplot(aes(tmin, tmax)) +
+  geom_hex()+
+   labs(
+    x = "Minimum temperature (tenths of degrees C)",
+    y = "Maximum temperature (tenths of degrees C)",
+    caption = "ny_noaa_data_year"
+  ) + 
+  theme_classic()
+ggplotly(hexplot)
+})
+
+```
+
+Row {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Tmax distribution of each year
+```{r}
+renderPlotly({
+  noaa<- noaa %>%
+    group_by(year) %>%
+    filter(month == input$month_choice,
+    prcp %in% input$prcp_range[1]:input$prcp_range[2])
+  
+noaa$tmax<- as.numeric(noaa$tmax)
+hist<- ggplot(noaa, aes(x =tmax , fill = year)) + 
+  geom_histogram(alpha= 0.8) +
+  labs(x = "Maximum temperature (tenths of degrees C)", y = "Number")
+
+ggplotly(hist)
+})
+
+```
+
+
+
+### Snowfall Distribution of each year
+
+```{r}
+renderPlotly({
+ny_noaa_data_snowfall =
+  filter(noaa, snow > 0 & snow < 100)%>%
+  filter(month == input$month_choice,
+         prcp %in% input$prcp_range[1]:input$prcp_range[2]) %>%
+  ggplot(aes(x = year, y = snow, fill = year, color = year)) + 
+  geom_violin()+ 
+  labs(
+    x = "year",
+    y = "snowfall(mm)",
+    caption = "Data from ny_noaa_data"
+  ) + 
+  theme(axis.text.x=element_text(angle=90,hjust=1)) + 
+  theme(legend.position = "bottom")
+ggplotly(ny_noaa_data_snowfall)
+})
+```
+
+
