@@ -23,3 +23,12 @@ Global Historical Climate Network includes daily land surface observations from 
  tmax: Maximum temperature (tenths of degrees C)
  
  tmin: Minimum temperature (tenths of degrees C)
+ 
+###Processing Step
+Data Import and Cleaning
+
+Hex Plot of Tmax against Tmin
+
+Histogram of Tmax Distribution of each year
+
+Violin Plot of Snowfall Distribution of each year
