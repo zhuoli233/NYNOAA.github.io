@@ -5,6 +5,8 @@ navbar:
   right:
     - text: "flexdashboard"
       href: flash.html
+    - text: "shinnydashboard"
+      href: https://zhuoli233.shinyapps.io/shiny/
     - icon: fa-github fa-lg
       href: https://github.com/xuqingsally/p8105_hw_6#p8105_hw_6
 output:
